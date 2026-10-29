@@ -4,7 +4,7 @@ A free, open-source subdomain registry for developers and students. Get your own
 
 The entire system is powered by Infrastructure-as-Code using DNSControl and synced live with Cloudflare via GitHub Actions.
 
-> **Recommended:** use the [JSON Generator](https://akjon.dev/generator.html) on our website to build your record file. It fills in the right format for GitHub Pages and Vercel (CNAME or A record), validates the Vercel TXT value, and avoids the most common PR validation errors.
+> **Recommended:** use the [JSON Generator](https://akjon.dev/generate-json) on our website to build your record file. It fills in the right format for GitHub Pages and Vercel (CNAME or A record), validates the Vercel TXT value, and avoids the most common PR validation errors.
 
 ## Requirements
 
