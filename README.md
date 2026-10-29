@@ -4,9 +4,11 @@ A free, open-source subdomain registry for developers and students. Get your own
 
 The entire system is powered by Infrastructure-as-Code using DNSControl and synced live with Cloudflare via GitHub Actions.
 
+> **Recommended:** use the [JSON Generator](https://akjon.dev/generator.html) on our website to build your record file. It fills in the right format for GitHub Pages and Vercel (CNAME or A record), validates the Vercel TXT value, and avoids the most common PR validation errors.
+
 ## Requirements
 
-- **Hosting**: Your subdomain must point to a static host: **GitHub Pages** (CNAME) or **Vercel** (A record + `_vercel` TXT verification). Each has its own setup step below.
+- **Hosting**: Your subdomain must point to a static host: **GitHub Pages** (CNAME) or **Vercel** (CNAME or A record + `_vercel` TXT verification). Each has its own setup step below.
 - **Username Matching**: The name of your JSON file must match your GitHub username exactly (e.g. if your username is `arif-dev`, your file must be `domains/akjon.dev/arif-dev.json`).
 - **Ownership**: You must be the owner of the GitHub account matching the filename. Automated verification ensures that you can only modify your own domain records.
 
@@ -23,7 +25,7 @@ cd domain
 
 ### 2. Create Your Record File
 
-Inside the `domains/` folder, pick one of the three domains (`akjon.dev`, `code-space.me`, `id-card.me`) and create a file named exactly after your GitHub username with a `.json` extension.
+Inside the `domains/` folder, pick one of the three domains (`akjon.dev`, `code-space.me`, `id-card.me`) and create a file named exactly after your GitHub username with a `.json` extension. (The [JSON Generator](https://akjon.dev/generator.html) can build the contents for you.)
 
 Example (`domains/akjon.dev/YOUR-USERNAME.json`):
 
@@ -74,6 +76,8 @@ Do this **after** your pull request has been merged and DNS has synced:
 
 ### 4b. Set Up Vercel (if you use Vercel)
 
+> 💡 **Tip:** the [JSON Generator](https://akjon.dev/generator.html) builds this file for you. Choose **Vercel**, pick **CNAME** (default) or **A record**, paste your values, and copy the result.
+
 Vercel needs a `CNAME` (or `A`) record **and** a TXT verification record. Put **both in the same single file** (`domains/akjon.dev/YOUR-USERNAME.json`):
 
 ```json
@@ -101,13 +105,13 @@ Vercel needs a `CNAME` (or `A`) record **and** a TXT verification record. Put **
 - **Do not** create a file named `_vercel.YOUR-USERNAME.json`. The PR validator rejects it. Use the `TXT` object with `"name": "_vercel"` inside your normal file instead.
 - The registry publishes your TXT record at `_vercel.akjon.dev` (not `_vercel.YOUR-USERNAME.akjon.dev`), which is where Vercel looks for it.
 - The TXT `value` must start with `vc-domain-verify=YOUR-USERNAME.akjon.dev,` (your exact subdomain and domain). Otherwise the PR fails validation, so nobody can verify someone else's subdomain.
-- Use the **CNAME target** shown in your Vercel dashboard (Settings → Domains). If you prefer an A record, use `"A": ["216.198.79.1"]` instead (check the dashboard for the current IP). Use only one of CNAME or A.
+- **CNAME is the default.** Use the **CNAME target** shown in your Vercel dashboard (Settings → Domains). If you prefer an A record, replace the `CNAME` line with `"A": ["216.198.79.1"]` (check the dashboard for the current IP). Use **only one** of CNAME or A, never both.
 
 ### Troubleshooting
 
 | Problem | Cause / fix |
 | --- | --- |
-| `SSL_ERROR_BAD_CERT_DOMAIN`, certificate valid only for `*.github.io` | You have not set the custom domain in **Settings → Pages** yet (step 4), or GitHub is still issuing the certificate. Wait up to an hour after saving. |
+| `SSL_ERROR_BAD_CERT_DOMAIN`, certificate valid only for `*.github.io` | You have not set the custom domain in **Settings → Pages** yet (step 4a), or GitHub is still issuing the certificate. Wait up to an hour after saving. |
 | "DNS check unsuccessful" in Pages settings | Your PR is not merged or synced yet. Wait a few minutes and click **Check again**. Run `dig yourname.akjon.dev CNAME` to confirm it points to `yourname.github.io`. |
 | "Enforce HTTPS" is greyed out | The certificate has not been issued yet. Wait, or remove and re-add the custom domain to trigger it again. |
 | Vercel says "Invalid Configuration" or won't verify | Make sure the PR is merged and synced (5 min), the TXT value was copied exactly from Vercel, and your A/CNAME matches the dashboard. |
