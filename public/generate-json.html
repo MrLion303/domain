@@ -79,8 +79,7 @@
                             </div>
                         </div>
                     </div>
-                    <p class="text-[11px] text-neutral-600">Lowercase letters, numbers and dashes only. This becomes your file name and <strong class="text-neutral-400">must match your GitHub username exactly</strong>.</p>
-                    <p id="name-warn" class="hidden text-[11px] text-amber-500"></p>
+                    <p class="text-[11px] text-neutral-600">Lowercase letters, numbers and dashes only. Choose any available subdomain name; it does not need to match your GitHub username.</p>
                 </div>
 
                 <!-- Row 2: GitHub username + Email -->
@@ -211,7 +210,6 @@ git push origin main</pre>
             <div class="bg-[#050505] border border-neutral-900 rounded-xl px-4 py-3 flex flex-wrap gap-x-4 gap-y-1">
                 <span class="text-[11px] text-neutral-500">→ lowercase, numbers, dashes only</span>
                 <span class="text-[11px] text-neutral-500">→ no <code class="bg-[#111] px-1 rounded border border-neutral-800 text-neutral-400 font-mono text-[10px]">www</code> <code class="bg-[#111] px-1 rounded border border-neutral-800 text-neutral-400 font-mono text-[10px]">api</code> <code class="bg-[#111] px-1 rounded border border-neutral-800 text-neutral-400 font-mono text-[10px]">admin</code> <code class="bg-[#111] px-1 rounded border border-neutral-800 text-neutral-400 font-mono text-[10px]">mail</code></span>
-                <span class="text-[11px] text-neutral-500">→ filename must match your GitHub username</span>
                 <span class="text-[11px] text-neutral-500">→ no bare IP addresses</span>
             </div>
 
@@ -406,17 +404,6 @@ git push origin main</pre>
         const mail = (document.getElementById('email')?.value || '').trim();
         const d    = document.getElementById('domain-select').value;
         const svc  = services[currentService];
-
-        // Filename must match GitHub username
-        const warn = document.getElementById('name-warn');
-        const rawSub  = (document.getElementById('subdomain')?.value || '').trim();
-        const rawUser = (document.getElementById('username')?.value || '').trim().toLowerCase();
-        if (rawSub && rawUser && rawSub !== rawUser) {
-            warn.textContent = `⚠️ File name "${rawSub}" doesn't match GitHub username "${rawUser}". Your PR will fail the ownership check.`;
-            warn.classList.remove('hidden');
-        } else {
-            warn.classList.add('hidden');
-        }
 
         // Build owner
         const owner = { username: user };
