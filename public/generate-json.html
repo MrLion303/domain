@@ -79,7 +79,8 @@
                             </div>
                         </div>
                     </div>
-                    <p class="text-[11px] text-neutral-600">Lowercase letters, numbers and dashes only. This is your file name — doesn't have to match your GitHub username.</p>
+                    <p class="text-[11px] text-neutral-600">Lowercase letters, numbers and dashes only. This becomes your file name and <strong class="text-neutral-400">must match your GitHub username exactly</strong>.</p>
+                    <p id="name-warn" class="hidden text-[11px] text-amber-500"></p>
                 </div>
 
                 <!-- Row 2: GitHub username + Email -->
@@ -157,7 +158,7 @@
                     </div>
                 </div>
 
-                <!-- File 2 (vercel / netlify) -->
+                <!-- File 2 (netlify) -->
                 <div id="file2-wrap" class="hidden bg-[#000] border border-neutral-900 rounded-xl overflow-hidden">
                     <div class="flex justify-between items-center px-4 py-2 border-b border-neutral-900 bg-[#0a0a0a]">
                         <span id="file2-name" class="text-[11px] font-mono text-neutral-400"></span>
@@ -210,7 +211,7 @@ git push origin main</pre>
             <div class="bg-[#050505] border border-neutral-900 rounded-xl px-4 py-3 flex flex-wrap gap-x-4 gap-y-1">
                 <span class="text-[11px] text-neutral-500">→ lowercase, numbers, dashes only</span>
                 <span class="text-[11px] text-neutral-500">→ no <code class="bg-[#111] px-1 rounded border border-neutral-800 text-neutral-400 font-mono text-[10px]">www</code> <code class="bg-[#111] px-1 rounded border border-neutral-800 text-neutral-400 font-mono text-[10px]">api</code> <code class="bg-[#111] px-1 rounded border border-neutral-800 text-neutral-400 font-mono text-[10px]">admin</code> <code class="bg-[#111] px-1 rounded border border-neutral-800 text-neutral-400 font-mono text-[10px]">mail</code></span>
-                <span class="text-[11px] text-neutral-500">→ filename must match subdomain</span>
+                <span class="text-[11px] text-neutral-500">→ filename must match your GitHub username</span>
                 <span class="text-[11px] text-neutral-500">→ no bare IP addresses</span>
             </div>
 
@@ -277,6 +278,7 @@ git push origin main</pre>
     }
 
     // ── Vercel state (kept across re-renders) ──────────────────
+    // CNAME is the default record type.
     const vercelState = { type: 'cname', cname: '', ip: '216.198.79.1', txt: '' };
 
     function setVercelType(type, skipGenerate) {
@@ -311,19 +313,26 @@ git push origin main</pre>
             document.getElementById('cname-val').addEventListener('input', generate);
         } else if (svc.type === 'vercel') {
             container.innerHTML = `
-                <div class="bg-[#0a0a0a] border border-neutral-900 rounded-lg px-4 py-3 text-[11px] text-neutral-500 leading-relaxed">
-                    Vercel needs <strong class="text-neutral-300">1 file</strong> with a <span class="text-neutral-300 font-mono">CNAME</span> (or <span class="text-neutral-300 font-mono">A</span>) record + a <span class="text-neutral-300 font-mono">TXT</span> verification record. We publish the TXT at <span class="text-neutral-300 font-mono">_vercel</span> for you. Add your domain in Vercel dashboard → Domains, then copy the values it shows.
+                <div class="bg-[#0a0a0a] border border-neutral-900 rounded-lg px-4 py-3 text-[11px] text-neutral-500 leading-relaxed space-y-1.5">
+                    <p>Vercel needs a <span class="text-neutral-300 font-mono">CNAME</span> (or <span class="text-neutral-300 font-mono">A</span>) record <strong class="text-neutral-300">and</strong> a <span class="text-neutral-300 font-mono">TXT</span> record, both in the <strong class="text-neutral-300">same single file</strong>.</p>
+                    <ol class="list-decimal pl-4 space-y-0.5">
+                        <li>In Vercel: project → <span class="text-neutral-300">Settings → Domains</span> → add your subdomain.</li>
+                        <li>Copy the CNAME target (or A IP) and the TXT value (starts with <span class="text-neutral-300 font-mono">vc-domain-verify=</span>).</li>
+                        <li>Paste them below, then open your PR.</li>
+                        <li>After it's merged, click <span class="text-neutral-300">Refresh</span> in Vercel.</li>
+                    </ol>
+                    <p>Do <strong class="text-neutral-300">not</strong> create a <span class="text-neutral-300 font-mono">_vercel.*.json</span> file. The TXT is published at <span class="text-neutral-300 font-mono">_vercel.&lt;domain&gt;</span> for you.</p>
                 </div>
                 <div class="space-y-1.5">
                     <label class="text-xs font-medium text-neutral-400">Record type <span class="text-red-500">*</span></label>
                     <div class="grid grid-cols-2 gap-2">
                         <button type="button" id="vtype-cname" onclick="setVercelType('cname')" class="border rounded-md px-3 py-2 text-left transition-all">
-                            <div class="text-xs font-semibold">CNAME</div>
-                            <div class="text-[10px] font-mono text-neutral-500">recommended for subdomains</div>
+                            <div class="text-xs font-semibold">CNAME <span class="text-[#0066ff] font-mono text-[10px]">default</span></div>
+                            <div class="text-[10px] font-mono text-neutral-500">use the target from your Vercel dashboard</div>
                         </button>
                         <button type="button" id="vtype-a" onclick="setVercelType('a')" class="border rounded-md px-3 py-2 text-left transition-all">
                             <div class="text-xs font-semibold">A record</div>
-                            <div class="text-[10px] font-mono text-neutral-500">IP address</div>
+                            <div class="text-[10px] font-mono text-neutral-500">switch if you prefer an IP</div>
                         </button>
                     </div>
                 </div>
@@ -333,13 +342,13 @@ git push origin main</pre>
                             <label class="text-xs font-medium text-neutral-400">CNAME target <span class="text-red-500">*</span></label>
                             <input id="vercel-cname" type="text" value="${vercelState.cname}" placeholder="xxxxxxxxxxxxxxxx.vercel-dns-017.com" autocomplete="off" spellcheck="false"
                                 class="w-full bg-[#0a0a0a] border border-neutral-800 rounded-md px-3 py-2 text-sm text-white placeholder-neutral-600 transition-all font-mono">
-                            <p class="text-[10px] text-neutral-600">Copy it from Vercel → Domains. Older projects can use cname.vercel-dns.com.</p>
+                            <p class="text-[10px] text-neutral-600">Copy the target shown in Vercel → Settings → Domains.</p>
                         </div>
                         <div id="vercel-a-wrap" class="space-y-1.5">
                             <label class="text-xs font-medium text-neutral-400">A Record IP <span class="text-red-500">*</span></label>
                             <input id="vercel-ip" type="text" value="${vercelState.ip}" autocomplete="off" spellcheck="false"
                                 class="w-full bg-[#0a0a0a] border border-neutral-800 rounded-md px-3 py-2 text-sm text-white placeholder-neutral-600 transition-all font-mono">
-                            <p class="text-[10px] text-neutral-600">Verify in your Vercel dashboard — may differ.</p>
+                            <p class="text-[10px] text-neutral-600">Check your Vercel dashboard for the current IP. Use only one of CNAME or A.</p>
                         </div>
                     </div>
                     <div class="space-y-1.5">
@@ -379,14 +388,15 @@ git push origin main</pre>
     }
 
     // ── JSON render with syntax highlight ─────────────────────
+    function escapeHtml(s) {
+        return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
     function renderJSON(obj) {
-        return JSON.stringify(obj, null, 2)
-            .replace(/"(owner|username|email|records|CNAME|A|TXT|name|value)"/g,
+        return escapeHtml(JSON.stringify(obj, null, 2))
+            .replace(/"(owner|username|email|records|CNAME|A|TXT|name|value)"(?=:)/g,
                 '<span class="text-blue-400">"$1"</span>')
             .replace(/: ("([^"]*)")/g,
-                ': <span class="text-green-400">$1</span>')
-            .replace(/: (\[)/g, ': [')
-            .replace(/"([^"]+)"(?=:)/g, m => m); // keys stay blue
+                ': <span class="text-green-400">$1</span>');
     }
 
     // ── Main generate ──────────────────────────────────────────
@@ -396,6 +406,17 @@ git push origin main</pre>
         const mail = (document.getElementById('email')?.value || '').trim();
         const d    = document.getElementById('domain-select').value;
         const svc  = services[currentService];
+
+        // Filename must match GitHub username
+        const warn = document.getElementById('name-warn');
+        const rawSub  = (document.getElementById('subdomain')?.value || '').trim();
+        const rawUser = (document.getElementById('username')?.value || '').trim().toLowerCase();
+        if (rawSub && rawUser && rawSub !== rawUser) {
+            warn.textContent = `⚠️ File name "${rawSub}" doesn't match GitHub username "${rawUser}". Your PR will fail the ownership check.`;
+            warn.classList.remove('hidden');
+        } else {
+            warn.classList.add('hidden');
+        }
 
         // Build owner
         const owner = { username: user };
@@ -444,11 +465,11 @@ git push origin main</pre>
             if (missingTarget) {
                 note.innerHTML = `⚠️ Enter the ${vercelState.type === 'cname' ? 'CNAME target' : 'A record IP'} shown in your Vercel dashboard.`;
             } else if (!txt) {
-                note.innerHTML = `⚠️ Paste the TXT value from Vercel (Domains → your domain → verification). It must start with <code class="${code}">${expectedPrefix}</code>`;
+                note.innerHTML = `⚠️ Paste the TXT value from Vercel (Settings → Domains). It must start with <code class="${code}">${escapeHtml(expectedPrefix)}</code>`;
             } else if (!txt.startsWith(expectedPrefix)) {
-                note.innerHTML = `❌ This TXT value does not match <code class="${code}">${sub}.${d}</code>. It must start with <code class="${code}">${expectedPrefix}</code> or your PR will fail validation.`;
+                note.innerHTML = `❌ This TXT value does not match <code class="${code}">${sub}.${d}</code>. It must start with <code class="${code}">${escapeHtml(expectedPrefix)}</code> or your PR will fail validation.`;
             } else {
-                note.innerHTML = `✅ One file only. Do not create a <code class="${code}">_vercel.*.json</code> file. The TXT record is published at <code class="${code}">_vercel.${d}</code> automatically.`;
+                note.innerHTML = `✅ One file only. Do not create a <code class="${code}">_vercel.*.json</code> file. The TXT is published at <code class="${code}">_vercel.${d}</code> automatically. After your PR is merged, click <strong>Refresh</strong> in Vercel.`;
             }
             document.getElementById('file-count-badge').textContent = '1 file';
 
@@ -483,15 +504,6 @@ git push origin main</pre>
     // ── Input listeners ────────────────────────────────────────
     document.getElementById('subdomain').addEventListener('input', e => {
         e.target.value = e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '');
-        // Re-auto-fill github pages cname if applicable
-        if (currentService === 'github-pages') {
-            const ci = document.getElementById('cname-val');
-            if (ci && (!ci.value || ci.value === ci.dataset.auto)) {
-                const u = document.getElementById('username').value.trim();
-                ci.value = u ? `${u}.github.io` : '';
-                ci.dataset.auto = ci.value;
-            }
-        }
         generate();
     });
     document.getElementById('username').addEventListener('input', e => {
