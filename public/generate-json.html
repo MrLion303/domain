@@ -296,7 +296,7 @@ git push origin main</pre>
         } else if (svc.type === 'vercel') {
             container.innerHTML = `
                 <div class="bg-[#0a0a0a] border border-neutral-900 rounded-lg px-4 py-3 text-[11px] text-neutral-500 leading-relaxed">
-                    Vercel needs <strong class="text-neutral-300">2 files</strong>: an <span class="text-neutral-300 font-mono">A</span> record for your subdomain + a <span class="text-neutral-300 font-mono">TXT</span> verification file. Get the TXT value from Vercel dashboard → Domains → Continue manually.
+                    Vercel needs <strong class="text-neutral-300">1 file</strong> containing an <span class="text-neutral-300 font-mono">A</span> record + a <span class="text-neutral-300 font-mono">TXT</span> verification record. We publish the TXT at <span class="text-neutral-300 font-mono">_vercel</span> for you. Add your domain in Vercel dashboard → Domains, then copy the TXT value it shows. It must start with <span class="text-neutral-300 font-mono">vc-domain-verify=yourname.domain,</span>.
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div class="space-y-1.5">
@@ -306,8 +306,8 @@ git push origin main</pre>
                         <p class="text-[10px] text-neutral-600">Verify in your Vercel dashboard — may differ.</p>
                     </div>
                     <div class="space-y-1.5">
-                        <label class="text-xs font-medium text-neutral-400">TXT verification value <span class="text-neutral-600">(optional)</span></label>
-                        <input id="vercel-txt" type="text" placeholder="vc-domain-verify=..." autocomplete="off" spellcheck="false"
+                        <label class="text-xs font-medium text-neutral-400">TXT verification value <span class="text-red-500">*</span></label>
+                        <input id="vercel-txt" type="text" placeholder="vc-domain-verify=yourname.akjon.dev,abc123..." autocomplete="off" spellcheck="false"
                             class="w-full bg-[#0a0a0a] border border-neutral-800 rounded-md px-3 py-2 text-sm text-white placeholder-neutral-600 transition-all font-mono">
                     </div>
                 </div>`;
@@ -339,7 +339,7 @@ git push origin main</pre>
     // ── JSON render with syntax highlight ─────────────────────
     function renderJSON(obj) {
         return JSON.stringify(obj, null, 2)
-            .replace(/"(owner|username|email|records|CNAME|A|TXT)"/g,
+            .replace(/"(owner|username|email|records|CNAME|A|TXT|name|value)"/g,
                 '<span class="text-blue-400">"$1"</span>')
             .replace(/: ("([^"]*)")/g,
                 ': <span class="text-green-400">$1</span>')
@@ -363,9 +363,7 @@ git push origin main</pre>
         document.getElementById('file1-name').textContent = `domains/${d}/${sub}.json`;
 
         // Git snippet
-        const extraAdd = currentService === 'vercel'
-            ? `\ngit add domains/${d}/_vercel.${sub}.json`
-            : currentService === 'netlify'
+        const extraAdd = currentService === 'netlify'
                 ? `\ngit add domains/${d}/www.${sub}.json`
                 : '';
         document.getElementById('git-snippet').textContent =
@@ -382,19 +380,24 @@ git push origin main</pre>
         } else if (svc.type === 'vercel') {
             const ip  = (document.getElementById('vercel-ip')?.value || '216.198.79.1').trim();
             const txt = (document.getElementById('vercel-txt')?.value || '').trim();
+            const expectedPrefix = `vc-domain-verify=${sub}.${d},`;
 
-            document.getElementById('output1').innerHTML = renderJSON({ owner, records: { A: [ip] } });
+            const records = { A: [ip] };
+            records.TXT = { name: '_vercel', value: txt || `${expectedPrefix}xxxxxxxxxxxxxxxxxxxx` };
+            document.getElementById('output1').innerHTML = renderJSON({ owner, records });
 
-            document.getElementById('file2-name').textContent = `domains/${d}/_vercel.${sub}.json`;
-            document.getElementById('output2').innerHTML = renderJSON({ owner, records: { TXT: txt || 'vc-domain-verify=...' } });
-            document.getElementById('file2-wrap').classList.remove('hidden');
+            document.getElementById('file2-wrap').classList.add('hidden');
 
             const note = document.getElementById('output-note');
             note.classList.remove('hidden');
-            note.innerHTML = txt
-                ? '✅ TXT value entered — both files ready to commit.'
-                : '⚠️ TXT value is optional but recommended. Leave blank if you don\'t have it yet — you can add it later.';
-            document.getElementById('file-count-badge').textContent = '2 files required';
+            if (!txt) {
+                note.innerHTML = `⚠️ Paste the TXT value from Vercel (Domains → your domain → verification). It must start with <code class="bg-[#111] px-1 rounded border border-neutral-800 text-neutral-300 font-mono text-[10px]">${expectedPrefix}</code>`;
+            } else if (!txt.startsWith(expectedPrefix)) {
+                note.innerHTML = `❌ This TXT value does not match <code class="bg-[#111] px-1 rounded border border-neutral-800 text-neutral-300 font-mono text-[10px]">${sub}.${d}</code>. It must start with <code class="bg-[#111] px-1 rounded border border-neutral-800 text-neutral-300 font-mono text-[10px]">${expectedPrefix}</code> or your PR will fail validation.`;
+            } else {
+                note.innerHTML = '✅ One file only. Do not create a <code class="bg-[#111] px-1 rounded border border-neutral-800 text-neutral-300 font-mono text-[10px]">_vercel.*.json</code> file. The TXT record is published at <code class="bg-[#111] px-1 rounded border border-neutral-800 text-neutral-300 font-mono text-[10px]">_vercel.' + d + '</code> automatically.';
+            }
+            document.getElementById('file-count-badge').textContent = '1 file';
 
         } else if (svc.type === 'netlify') {
             const netlifyUrl = (document.getElementById('netlify-cname')?.value || '').trim() || 'yoursite.netlify.app';

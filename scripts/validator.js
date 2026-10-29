@@ -129,6 +129,25 @@ function validate() {
             showErrorAndExit(`❌ Error: \`${file}\` is missing required schema components (owner.username, records).`);
         }
 
+        // 4b. Vercel TXT verification: must be scoped to the user's own hostname.
+        // The record is published at "_vercel.<zone>", so the token must name this exact subdomain.
+        {
+            const parts = file.split('/');
+            const zone = parts.length >= 3 ? parts[1] : '';
+            const txtList = data.records && data.records.TXT
+                ? (Array.isArray(data.records.TXT) ? data.records.TXT : [data.records.TXT])
+                : [];
+            txtList.forEach(entry => {
+                if (entry && typeof entry === 'object' && typeof entry.name === 'string'
+                    && entry.name.split('.')[0].toLowerCase() === '_vercel') {
+                    const expected = `vc-domain-verify=${filename}.${zone},`;
+                    if (typeof entry.value !== 'string' || !entry.value.startsWith(expected)) {
+                        showErrorAndExit(`❌ Error: In \`${file}\` the Vercel TXT value must start with \`${expected}\` (copy it from Vercel dashboard → Domains). Use: "TXT": { "name": "_vercel", "value": "${expected}xxxxxxxx" }`);
+                    }
+                }
+            });
+        }
+
         // 5. Strict Ownership Guardrail
         if (githubActor && !validatingAll && !isMaintainer) {
             if (isNewFile) {
