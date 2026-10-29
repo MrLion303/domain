@@ -74,7 +74,7 @@ Do this **after** your pull request has been merged and DNS has synced:
 
 ### 4b. Set Up Vercel (if you use Vercel)
 
-Vercel needs an `A` record **and** a TXT verification record. Put **both in the same single file** (`domains/akjon.dev/YOUR-USERNAME.json`):
+Vercel needs a `CNAME` (or `A`) record **and** a TXT verification record. Put **both in the same single file** (`domains/akjon.dev/YOUR-USERNAME.json`):
 
 ```json
 {
@@ -82,7 +82,7 @@ Vercel needs an `A` record **and** a TXT verification record. Put **both in the 
     "username": "YOUR-USERNAME"
   },
   "records": {
-    "A": ["216.198.79.1"],
+    "CNAME": "xxxxxxxxxxxxxxxx.vercel-dns-017.com",
     "TXT": {
       "name": "_vercel",
       "value": "vc-domain-verify=YOUR-USERNAME.akjon.dev,xxxxxxxxxxxxxxxxxxxx"
@@ -101,7 +101,7 @@ Vercel needs an `A` record **and** a TXT verification record. Put **both in the 
 - **Do not** create a file named `_vercel.YOUR-USERNAME.json`. The PR validator rejects it. Use the `TXT` object with `"name": "_vercel"` inside your normal file instead.
 - The registry publishes your TXT record at `_vercel.akjon.dev` (not `_vercel.YOUR-USERNAME.akjon.dev`), which is where Vercel looks for it.
 - The TXT `value` must start with `vc-domain-verify=YOUR-USERNAME.akjon.dev,` (your exact subdomain and domain). Otherwise the PR fails validation, so nobody can verify someone else's subdomain.
-- Vercel may show a different A record IP or a project-specific CNAME target (e.g. `xxxx.vercel-dns-017.com.`). Use whatever your dashboard shows. If it shows a CNAME, use `"CNAME": "xxxx.vercel-dns-017.com."` instead of `A`.
+- Use the **CNAME target** shown in your Vercel dashboard (Settings → Domains). If you prefer an A record, use `"A": ["216.198.79.1"]` instead (check the dashboard for the current IP). Use only one of CNAME or A.
 
 ### Troubleshooting
 
