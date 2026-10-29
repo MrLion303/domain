@@ -25,7 +25,7 @@ cd domain
 
 ### 2. Create Your Record File
 
-Inside the `domains/` folder, pick one of the three domains (`akjon.dev`, `code-space.me`, `id-card.me`) and create a file named exactly after your GitHub username with a `.json` extension. (The [JSON Generator](https://akjon.dev/generator.html) can build the contents for you.)
+Inside the `domains/` folder, pick one of the three domains (`akjon.dev`, `code-space.me`, `id-card.me`) and create a file named exactly after your GitHub username with a `.json` extension. (The [JSON Generator](https://akjon.dev/generate-json ) can build the contents for you.)
 
 Example (`domains/akjon.dev/YOUR-USERNAME.json`):
 
@@ -137,4 +137,4 @@ The Core Domain Validator runs on every Pull Request:
 - `Record Valid` / `Record Invalid`: Automatic status indicators.
 - `bypass`: Used by maintainers to skip verification.
 
-Maintained with ❤️ by @s8rr
+Maintained by @s8rr
